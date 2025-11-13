@@ -12,7 +12,7 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode
 @Entity
-@Table(name = "address", schema = "UnchainedGames") // Añadido @Entity y nombre de tabla
+@Table(name = "address", schema = "UnchainedGames", catalog = "postgres")
 public class Address {
 
     @Id
@@ -37,8 +37,7 @@ public class Address {
     @Column(name = "province")
     private String province;
 
-    // Relación inversa corregida
-    @ManyToMany(mappedBy = "addresses") // Cambiado de "usuario" a "addresses"
+    @ManyToMany(mappedBy = "addresses")
     @ToString.Exclude
     private Set<Usuario> usuarios;
 }

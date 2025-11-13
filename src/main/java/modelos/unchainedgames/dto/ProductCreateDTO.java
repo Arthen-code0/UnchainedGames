@@ -1,6 +1,8 @@
 package modelos.unchainedgames.dto;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import modelos.unchainedgames.models.Category;
 import modelos.unchainedgames.models.Language;
 import modelos.unchainedgames.models.Mechanics;
@@ -8,6 +10,8 @@ import modelos.unchainedgames.models.Mechanics;
 import java.util.Set;
 
 @Data
+@Getter
+@Setter
 public class ProductCreateDTO {
 
     private String name;

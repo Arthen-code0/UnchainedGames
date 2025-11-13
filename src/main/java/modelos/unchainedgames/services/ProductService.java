@@ -2,7 +2,6 @@ package modelos.unchainedgames.services;
 
 import lombok.AllArgsConstructor;
 import modelos.unchainedgames.dto.ProductCreateDTO;
-import modelos.unchainedgames.models.Mechanics;
 import modelos.unchainedgames.models.Product;
 import modelos.unchainedgames.repository.ICategoryRepository;
 import modelos.unchainedgames.repository.ILanguageRepository;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -23,11 +21,11 @@ public class ProductService {
     private IMechanicsRepository mechanicsRepository;
     private ICategoryRepository categoryRepository;
 
-    public List<Product> obtenerTodosPedidos(){
+    public List<Product> obtenerTodosProductos(){
         return repository.findAll();
     }
 
-    public Product obtenerPedidosPorId(@PathVariable Integer id){
+    public Product obtenerProductosPorId(@PathVariable Integer id){
 
         Product product = repository.findById(id).orElse(null);
 

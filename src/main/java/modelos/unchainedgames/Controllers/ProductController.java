@@ -17,12 +17,12 @@ public class ProductController {
 
     @GetMapping("/all")
     public List<Product> obtenerTodosPedidos(){
-        return service.obtenerTodosPedidos();
+        return service.obtenerTodosProductos();
     }
 
     @GetMapping("/{id}")
     public Product obtenerPedidosPorId(@PathVariable Integer id){
-        return service.obtenerPedidosPorId(id);
+        return service.obtenerProductosPorId(id);
     }
 
     @PostMapping("/create")

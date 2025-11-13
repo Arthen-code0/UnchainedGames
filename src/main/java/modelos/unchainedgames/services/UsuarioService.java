@@ -4,25 +4,38 @@ import lombok.AllArgsConstructor;
 import modelos.unchainedgames.dto.UsuarioCreateDTO;
 import modelos.unchainedgames.models.Usuario;
 import modelos.unchainedgames.repository.IUsuarioRepository;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class UsuarioService {
+public class UsuarioService implements IUsuarioServices, UserDetailsService {
 
     private IUsuarioRepository repository;
 
-    public List<Usuario> obtenerTodosUsuarios(){
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return repository.findTopByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+    }
+
+    @Override
+    public List<Usuario> obtenerTodosUsuarios() {
         return repository.findAll();
     }
 
-    public Usuario obtenerUsuarioPorId(Integer id){
-        return repository.findById(id).orElse(null);
+    @Override
+    public Optional<Usuario> obtenerUsuarioPorId(Integer id) {
+        return repository.findById(id);
     }
 
-    public void createUsuario(UsuarioCreateDTO dto){
+    @Override
+    public void createUsuario(UsuarioCreateDTO dto) {
         Usuario newUsuario = new Usuario();
         newUsuario.setName(dto.getName());
         newUsuario.setSurnames(dto.getSurnames());
@@ -30,26 +43,24 @@ public class UsuarioService {
         newUsuario.setEmail(dto.getEmail());
         newUsuario.setPassword(dto.getPassword());
         newUsuario.setAddresses(dto.getAddresses());
-
         repository.save(newUsuario);
     }
 
-    public void updateUsuario(Integer id, UsuarioCreateDTO dto){
-        Usuario updatedUsuario = repository.findById(id).orElse(null);
-
-        if (updatedUsuario != null){
-            updatedUsuario.setName(dto.getName());
-            updatedUsuario.setSurnames(dto.getSurnames());
-            updatedUsuario.setPhoneNumber(dto.getPhoneNumber());
-            updatedUsuario.setEmail(dto.getEmail());
-            updatedUsuario.setPassword(dto.getPassword());
-            updatedUsuario.setAddresses(dto.getAddresses());
-
-            repository.save(updatedUsuario);
-        }
+    @Override
+    public void updateUsuario(Integer id, UsuarioCreateDTO dto) {
+        repository.findById(id).ifPresent(usuario -> {
+            usuario.setName(dto.getName());
+            usuario.setSurnames(dto.getSurnames());
+            usuario.setPhoneNumber(dto.getPhoneNumber());
+            usuario.setEmail(dto.getEmail());
+            usuario.setPassword(dto.getPassword());
+            usuario.setAddresses(dto.getAddresses());
+            repository.save(usuario);
+        });
     }
 
-    public void deleteUsuario(Integer id){
+    @Override
+    public void deleteUsuario(Integer id) {
         repository.deleteById(id);
     }
 }

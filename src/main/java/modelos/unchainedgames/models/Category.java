@@ -11,7 +11,7 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode
 @Entity
-@Table(name = "category", schema = "UnchainedGames")
+@Table(name = "category", schema = "UnchainedGames", catalog = "postgres")
 public class Category {
 
     @Id
