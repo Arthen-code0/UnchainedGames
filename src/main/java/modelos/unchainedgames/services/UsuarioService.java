@@ -25,8 +25,7 @@ public class UsuarioService implements IUsuarioServices, UserDetailsService {
     private IUsuarioRepository repository;
     private AuthenticationManager authenticationManager;
     private PasswordEncoder passwordEncoder;
-    private EmailService emailService; // Servicio para enviar emails
-
+    private EmailService emailService;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findTopByUsername(username)
