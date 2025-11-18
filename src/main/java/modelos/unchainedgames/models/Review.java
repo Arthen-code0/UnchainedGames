@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @ToString
 
 @Entity
-@Table(name = "review", schema = "UnchainedGames", catalog = "postgres")
+@Table(name = "review", schema = "unchainedgames", catalog = "postgres")
 public class Review {
 
     @Id

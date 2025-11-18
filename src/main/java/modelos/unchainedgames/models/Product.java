@@ -11,7 +11,7 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode
 @Entity
-@Table(name = "product", schema = "UnchainedGames", catalog = "postgres")
+@Table(name = "product", schema = "unchainedgames", catalog = "postgres")
 public class Product {
 
     @Id
@@ -53,7 +53,7 @@ public class Product {
     @ManyToMany
     @JoinTable(
             name = "product_mechanics",
-            schema = "UnchainedGames",
+            schema = "unchainedgames",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "mechanics_id")
     )
@@ -62,7 +62,7 @@ public class Product {
     @ManyToMany
     @JoinTable(
             name = "product_category",
-            schema = "UnchainedGames",
+            schema = "unchainedgames",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
@@ -71,7 +71,7 @@ public class Product {
     @ManyToMany
     @JoinTable(
             name = "product_language",
-            schema = "UnchainedGames",
+            schema = "unchainedgames",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "language_id")
     )

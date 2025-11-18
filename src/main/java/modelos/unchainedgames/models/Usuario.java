@@ -18,7 +18,7 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode
 @Entity
-@Table(name = "usuario", schema = "UnchainedGames", catalog = "postgres")
+@Table(name = "usuario", schema = "unchainedgames", catalog = "postgres")
 public class Usuario implements UserDetails {
 
     @Id
@@ -47,14 +47,25 @@ public class Usuario implements UserDetails {
     @Column(name = "rol", nullable = false)
     private Rol rol = Rol.USUARIO;
 
+    @Column(name = "enabled")
+    private Boolean enabled;
+
+    @Column(name = "verificationCode")
+    private String verificationCode;
+
+    @Column(name = "recoveryCode")
+    private String recoveryCode;
+
     @ManyToMany
     @JoinTable(
             name = "user_address",
-            schema = "UnchainedGames",
+            schema = "unchainedgames",
             joinColumns = @JoinColumn(name = "usuario_id"),
             inverseJoinColumns = @JoinColumn(name = "address_id")
     )
     private Set<Address> addresses;
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,4 +1,4 @@
-package modelos.unchainedgames.Controllers;
+package modelos.unchainedgames.controllers;
 
 import modelos.unchainedgames.dto.ProfileCreateDTO;
 import modelos.unchainedgames.models.Profile;

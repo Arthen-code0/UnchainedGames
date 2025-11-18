@@ -12,7 +12,7 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode
 @Entity
-@Table(name = "address", schema = "UnchainedGames", catalog = "postgres")
+@Table(name = "address", schema = "unchainedgames", catalog = "postgres")
 public class Address {
 
     @Id
@@ -20,7 +20,7 @@ public class Address {
     private Integer id;
 
     @Column(name = "postal_code")
-    private Integer postalCode; // Cambiado a camelCase
+    private Integer postalCode;
 
     @Column(name = "street")
     private String street;

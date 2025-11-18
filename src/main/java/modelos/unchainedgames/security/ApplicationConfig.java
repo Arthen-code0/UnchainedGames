@@ -19,7 +19,7 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> usuarioRepository.findTopByUsername(username) // CORREGIDO: usar la instancia, no la interfaz
+        return username -> usuarioRepository.findTopByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
     }
 

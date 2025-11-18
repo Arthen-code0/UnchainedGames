@@ -1,10 +1,7 @@
-package modelos.unchainedgames.Controllers;
+package modelos.unchainedgames.controllers;
 
-import modelos.unchainedgames.dto.ProductCreateDTO;
 import modelos.unchainedgames.dto.ReviewCreateDTO;
-import modelos.unchainedgames.models.Product;
 import modelos.unchainedgames.models.Review;
-import modelos.unchainedgames.services.ProductService;
 import modelos.unchainedgames.services.ReviewService;
 import org.springframework.web.bind.annotation.*;
 

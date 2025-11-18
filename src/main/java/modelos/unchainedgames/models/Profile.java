@@ -10,7 +10,7 @@ import lombok.*;
 @ToString
 
 @Entity
-@Table(name = "profile", schema = "UnchainedGames", catalog = "postgres")
+@Table(name = "profile", schema = "unchainedgames", catalog = "postgres")
 public class Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
