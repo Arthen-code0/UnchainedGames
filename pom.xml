@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>modelos</groupId>
-    <artifactId>UnchainedGames</artifactId>
+    <artifactId>UnchainedGamesBackend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>UnchainedGames</name>
     <description>UnchainedGames</description>
