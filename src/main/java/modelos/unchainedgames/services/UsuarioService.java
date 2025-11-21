@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import modelos.unchainedgames.dto.UsuarioCreateDTO;
 import modelos.unchainedgames.models.Usuario;
 import modelos.unchainedgames.repository.IUsuarioRepository;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,7 +26,6 @@ public class UsuarioService implements IUsuarioServices, UserDetailsService {
     private AuthenticationManager authenticationManager;
     private PasswordEncoder passwordEncoder;
     private EmailService emailService;
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findTopByUsername(username)
@@ -108,18 +106,18 @@ public class UsuarioService implements IUsuarioServices, UserDetailsService {
             throw new RuntimeException("El usuario ya está registrado");
         }
 
-        Usuario newUsuarioRegistro = new Usuario();
-        newUsuarioRegistro.setName(dto.getName());
-        newUsuarioRegistro.setSurnames(dto.getSurnames());
-        newUsuarioRegistro.setPhoneNumber(dto.getPhoneNumber());
-        newUsuarioRegistro.setEmail(dto.getEmail());
-        newUsuarioRegistro.setUsername(dto.getEmail());
-        newUsuarioRegistro.setPassword(passwordEncoder.encode(dto.getPassword()));
-        newUsuarioRegistro.setAddresses(dto.getAddresses());
-        newUsuarioRegistro.setEnabled(false); // No habilitado hasta verificación
-        newUsuarioRegistro.setVerificationCode(generateVerificationCode());
+        Usuario newUsuario = new Usuario();
+        newUsuario.setName(dto.getName());
+        newUsuario.setSurnames(dto.getSurnames());
+        newUsuario.setPhoneNumber(dto.getPhoneNumber());
+        newUsuario.setEmail(dto.getEmail());
+        newUsuario.setUsername(dto.getEmail());
+        newUsuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+        newUsuario.setAddresses(dto.getAddresses());
+        newUsuario.setEnabled(false); // No habilitado hasta verificación
+        newUsuario.setVerificationCode(generateVerificationCode());
 
-        Usuario usuarioGuardado = repository.save(newUsuarioRegistro);
+        Usuario usuarioGuardado = repository.save(newUsuario);
 
         // Enviar código de verificación
         emailService.sendVerificationEmail(usuarioGuardado.getEmail(), usuarioGuardado.getVerificationCode());
