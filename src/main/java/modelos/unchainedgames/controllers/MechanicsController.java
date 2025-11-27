@@ -1,6 +1,7 @@
 package modelos.unchainedgames.controllers;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import modelos.unchainedgames.dto.MechanicsCreateDTO;
 import modelos.unchainedgames.models.Mechanics;
 import modelos.unchainedgames.services.MechanicsService;
@@ -11,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/mechanics")
 @AllArgsConstructor
+
 public class MechanicsController {
 
     private MechanicsService service;

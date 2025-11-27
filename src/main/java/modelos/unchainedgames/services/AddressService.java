@@ -6,6 +6,7 @@ import modelos.unchainedgames.models.Address;
 import modelos.unchainedgames.repository.IAddressRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,7 +15,17 @@ public class AddressService {
 
     private IAddressRepository repository;
 
-    public List<Address> obtenerTodasDirecciones(){
+//    public List<Address> obtenerTodasDirecciones(){
+//
+//        List<Address> address = repository.findAll();
+//        List<AddressCreateDTO> list = new ArrayList<>();
+//        for(Address a : address){
+//            AddressCreateDTO dto = new AddressCreateDTO();
+//
+//        }
+//    }
+
+    public List<Address> obtenerTodasDirecciones() {
         return repository.findAll();
     }
 
@@ -24,6 +35,7 @@ public class AddressService {
 
     public void createAddress(AddressCreateDTO dto){
         Address newAddress = new Address();
+
         newAddress.setPostalCode(dto.getPostalCode());
         newAddress.setStreet(dto.getStreet());
         newAddress.setNumber(dto.getNumber());
@@ -53,5 +65,9 @@ public class AddressService {
 
     public void deleteAddress(Integer id){
         repository.deleteById(id);
+    }
+
+    public List<Address> obtenerDireccionesPorCiudad(String city) {
+        return repository.obtenerTodasDireccionesPorCiudad(city);
     }
 }

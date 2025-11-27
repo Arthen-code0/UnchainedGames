@@ -2,6 +2,7 @@ package modelos.unchainedgames.controllers;
 
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import modelos.unchainedgames.dto.PedidoCreateDTO;
 import modelos.unchainedgames.models.Pedido;
 import modelos.unchainedgames.services.PedidoService;

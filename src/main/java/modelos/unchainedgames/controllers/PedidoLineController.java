@@ -1,5 +1,7 @@
 package modelos.unchainedgames.controllers;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import modelos.unchainedgames.dto.PedidoLineCreateDTO;
 import modelos.unchainedgames.models.PedidoLine;
 import modelos.unchainedgames.services.PedidoLineService;
@@ -7,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
+@RequestMapping("/pedidoLine")
+@AllArgsConstructor
 public class PedidoLineController {
     private PedidoLineService service;
 

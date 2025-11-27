@@ -1,6 +1,6 @@
 package modelos.unchainedgames.controllers;
 
-import lombok.AllArgsConstructor;
+import lombok.*;
 import modelos.unchainedgames.dto.LanguageCreateDTO;
 import modelos.unchainedgames.models.Language;
 import modelos.unchainedgames.services.LanguageService;

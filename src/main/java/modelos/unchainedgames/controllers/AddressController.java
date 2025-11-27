@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import modelos.unchainedgames.dto.AddressCreateDTO;
 import modelos.unchainedgames.models.Address;
 import modelos.unchainedgames.services.AddressService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,12 @@ public class AddressController {
     @GetMapping("/{id}")
     public Address obtenerDireccionPorId(@PathVariable Integer id){
         return service.obtenerDireccionPorId(id);
+    }
+
+    @GetMapping("/city/{city}")  // Endpoint para buscar por ciudad
+    public ResponseEntity<List<Address>> obtenerDireccionesPorCiudad(@PathVariable String city){
+        List<Address> addresses = service.obtenerDireccionesPorCiudad(city);
+        return ResponseEntity.ok(addresses);
     }
 
     @PostMapping("/create")

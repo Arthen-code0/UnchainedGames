@@ -1,5 +1,7 @@
 package modelos.unchainedgames.controllers;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import modelos.unchainedgames.dto.ReviewCreateDTO;
 import modelos.unchainedgames.models.Review;
 import modelos.unchainedgames.services.ReviewService;
@@ -9,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/review")
+@AllArgsConstructor
 public class ReviewController {
 
     private ReviewService service;

@@ -1,6 +1,7 @@
 package modelos.unchainedgames.controllers;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import modelos.unchainedgames.dto.CategoryCreateDTO;
 import modelos.unchainedgames.models.Category;
 import modelos.unchainedgames.services.CategoryService;

@@ -1,12 +1,16 @@
 package modelos.unchainedgames.dto;
 
-import lombok.Data;
+import lombok.*;
 import modelos.unchainedgames.models.PedidoLine;
 import modelos.unchainedgames.models.Product;
 
 import java.math.BigDecimal;
 
 @Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class PedidoLineCreateDTO {
     private Integer id;
     private Integer amount;

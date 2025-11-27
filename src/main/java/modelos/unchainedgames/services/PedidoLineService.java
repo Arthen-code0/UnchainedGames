@@ -1,11 +1,15 @@
 package modelos.unchainedgames.services;
 
+import lombok.AllArgsConstructor;
 import modelos.unchainedgames.dto.PedidoLineCreateDTO;
 import modelos.unchainedgames.models.PedidoLine;
 import modelos.unchainedgames.repository.IPedidoLineRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
+@AllArgsConstructor
 public class PedidoLineService {
 
     private IPedidoLineRepository repository;

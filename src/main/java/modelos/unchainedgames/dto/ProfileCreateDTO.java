@@ -5,6 +5,8 @@ import lombok.*;
 @Data
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProfileCreateDTO {
     private Integer id;
     private String name;
