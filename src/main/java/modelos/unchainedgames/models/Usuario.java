@@ -38,6 +38,9 @@ public class Usuario  { //implements UserDetails
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @Column(name = "profilePhoto")
+    private String profilePhoto;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "rol", nullable = false)
     private Rol rol = Rol.USUARIO;

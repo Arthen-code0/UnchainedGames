@@ -25,7 +25,6 @@ public class PedidoLineService {
     public void createPedidoLine(PedidoLineCreateDTO dto){
         PedidoLine newPedidoLine = new PedidoLine();
         newPedidoLine.setAmount(dto.getAmount());
-        newPedidoLine.setPvp(dto.getPvp());
         newPedidoLine.setProduct(dto.getProduct());
 
         repository.save(newPedidoLine);
@@ -36,7 +35,6 @@ public class PedidoLineService {
 
         if (updatedPedidoLine != null){
             updatedPedidoLine.setAmount(dto.getAmount());
-            updatedPedidoLine.setPvp(dto.getPvp());
             updatedPedidoLine.setProduct(dto.getProduct());
 
             repository.save(updatedPedidoLine);

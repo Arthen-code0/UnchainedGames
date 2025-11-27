@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 public class PedidoLineCreateDTO {
     private Integer id;
     private Integer amount;
-    private BigDecimal pvp;
     private Product product;
     private PedidoLine pedidoLine;
 }

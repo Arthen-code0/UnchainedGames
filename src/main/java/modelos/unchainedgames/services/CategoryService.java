@@ -23,7 +23,9 @@ public class CategoryService {
     }
 
     public void createCategory(CategoryCreateDTO dto){
+
         Category newCategory = new Category();
+
         newCategory.setName(dto.getName());
         newCategory.setProducts(dto.getProducts());
 

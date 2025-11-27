@@ -23,9 +23,6 @@ public class PedidoLine {
     @Column(name = "amount")
     private Integer amount;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal pvp;
-
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
