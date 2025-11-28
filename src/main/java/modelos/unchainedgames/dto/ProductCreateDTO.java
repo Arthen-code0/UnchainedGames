@@ -15,6 +15,7 @@ import java.util.Set;
 public class ProductCreateDTO {
 
     private String name;
+    private String picture;
     private Integer playerMin;
     private Integer playerMax;
     private Double duration;

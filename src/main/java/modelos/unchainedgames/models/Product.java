@@ -21,6 +21,9 @@ public class Product {
     @Column(name  = "name")
     private String name;
 
+    @Column(name  = "picture")
+    private String picture;
+
     @Column(name = "player_min")
     private Integer playerMin;
 

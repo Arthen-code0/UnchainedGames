@@ -2,6 +2,7 @@ package modelos.unchainedgames.controllers;
 
 import lombok.*;
 import modelos.unchainedgames.dto.UsuarioCreateDTO;
+import modelos.unchainedgames.dto.UsuarioMostrarDTO;
 import modelos.unchainedgames.models.Usuario;
 import modelos.unchainedgames.services.UsuarioService;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class UsuarioController {
     private UsuarioService service;
 
     @GetMapping("/all")
-    public List<Usuario> obtenerTodosUsuarios(){
+    public List<UsuarioMostrarDTO> obtenerTodosUsuarios(){
         return service.obtenerTodosUsuarios();
     }
 

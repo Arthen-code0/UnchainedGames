@@ -25,7 +25,6 @@ public class LanguageService {
     public void createLanguage(LanguageCreateDTO dto){
         Language newLanguage = new Language();
         newLanguage.setName(dto.getName());
-        newLanguage.setProducts(dto.getProducts());
 
         repository.save(newLanguage);
     }
@@ -35,7 +34,6 @@ public class LanguageService {
 
         if (updatedLanguage != null){
             updatedLanguage.setName(dto.getName());
-            updatedLanguage.setProducts(dto.getProducts());
 
             repository.save(updatedLanguage);
         }

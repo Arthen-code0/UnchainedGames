@@ -27,7 +27,6 @@ public class CategoryService {
         Category newCategory = new Category();
 
         newCategory.setName(dto.getName());
-        newCategory.setProducts(dto.getProducts());
 
         repository.save(newCategory);
     }
@@ -37,7 +36,6 @@ public class CategoryService {
 
         if (updatedCategory != null){
             updatedCategory.setName(dto.getName());
-            updatedCategory.setProducts(dto.getProducts());
 
             repository.save(updatedCategory);
         }

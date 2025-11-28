@@ -25,7 +25,6 @@ public class MechanicsService {
     public void createMechanics(MechanicsCreateDTO dto){
         Mechanics newMechanics = new Mechanics();
         newMechanics.setName(dto.getName());
-        newMechanics.setProducts(dto.getProducts());
 
         repository.save(newMechanics);
     }
@@ -35,7 +34,6 @@ public class MechanicsService {
 
         if (updatedMechanics != null){
             updatedMechanics.setName(dto.getName());
-            updatedMechanics.setProducts(dto.getProducts());
 
             repository.save(updatedMechanics);
         }

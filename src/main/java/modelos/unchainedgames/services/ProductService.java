@@ -37,13 +37,13 @@ public class ProductService {
         Product NewProduct = new Product();
 
         NewProduct.setName(dto.getName());
+        NewProduct.setPicture(dto.getPicture());
         NewProduct.setPlayerMin(dto.getPlayerMin());
         NewProduct.setPlayerMax(dto.getPlayerMax());
         NewProduct.setDuration(dto.getDuration());
         NewProduct.setRecommendedAge(dto.getRecommendedAge());
         NewProduct.setPrice(dto.getPrice());
         NewProduct.setStock(dto.getStock());
-        NewProduct.setPrice(dto.getPrice());
         NewProduct.setBoxSize(dto.getBoxSize());
         NewProduct.setDifficulty(dto.getDifficulty());
         NewProduct.setDescription(dto.getDescription());

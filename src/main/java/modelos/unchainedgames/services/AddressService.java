@@ -41,7 +41,6 @@ public class AddressService {
         newAddress.setFloor(dto.getFloor());
         newAddress.setCity(dto.getCity());
         newAddress.setProvince(dto.getProvince());
-        newAddress.setUsuarios(dto.getUsuarios());
 
         repository.save(newAddress);
     }
@@ -56,7 +55,6 @@ public class AddressService {
             updatedAddress.setFloor(dto.getFloor());
             updatedAddress.setCity(dto.getCity());
             updatedAddress.setProvince(dto.getProvince());
-            updatedAddress.setUsuarios(dto.getUsuarios());
 
             repository.save(updatedAddress);
         }

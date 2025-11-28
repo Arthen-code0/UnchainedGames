@@ -21,8 +21,4 @@ public class Language {
     @Column(name = "name")
     private String name;
 
-    // Relación inversa opcional
-    @ManyToMany(mappedBy = "languages")
-    @ToString.Exclude
-    private Set<Product> products;
 }

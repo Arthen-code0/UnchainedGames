@@ -21,8 +21,4 @@ public class Mechanics {
     @Column(name = "name")
     private String name;
 
-    // Relación inversa opcional (no obligatoria)
-    @ManyToMany(mappedBy = "mechanics")
-    @ToString.Exclude
-    private Set<Product> products;
 }
