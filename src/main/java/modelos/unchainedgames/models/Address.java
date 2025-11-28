@@ -37,7 +37,4 @@ public class Address {
     @Column(name = "province")
     private String province;
 
-    @ManyToMany(mappedBy = "addresses")
-    @ToString.Exclude
-    private Set<Usuario> usuarios;
 }

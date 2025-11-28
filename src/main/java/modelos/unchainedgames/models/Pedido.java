@@ -29,4 +29,8 @@ public class Pedido {
     @JoinColumn(name = "user_id")
     private Usuario usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "pedidoLine_id")
+    private PedidoLine pedidoLine;
+
 }

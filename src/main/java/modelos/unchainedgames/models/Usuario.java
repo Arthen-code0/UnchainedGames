@@ -26,9 +26,6 @@ public class Usuario  { //implements UserDetails
     @Column(name = "surnames")
     private String surnames;
 
-    @Column(name = "username")
-    private String username;
-
     @Column(name = "email")
     private String email;
 
@@ -37,9 +34,6 @@ public class Usuario  { //implements UserDetails
 
     @Column(name = "phone_number")
     private String phoneNumber;
-
-    @Column(name = "profilePhoto")
-    private String profilePhoto;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rol", nullable = false)

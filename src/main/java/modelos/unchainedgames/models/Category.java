@@ -21,7 +21,4 @@ public class Category {
     @Column(name = "name")
     private String name;
 
-    @ManyToMany(mappedBy = "categories")
-    @ToString.Exclude
-    private Set<Product> products;
 }

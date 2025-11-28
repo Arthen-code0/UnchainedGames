@@ -2,22 +2,45 @@ package modelos.unchainedgames.services;
 
 import lombok.*;
 import modelos.unchainedgames.dto.UsuarioCreateDTO;
+import modelos.unchainedgames.dto.UsuarioMostrarDTO;
 import modelos.unchainedgames.models.Usuario;
 import modelos.unchainedgames.repository.IUsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsuarioService  { //implements IUsuarioServices, UserDetailsService
 
+    @Autowired
     private IUsuarioRepository repository;
 
-    public List<Usuario> obtenerTodosUsuarios(){
-        return repository.findAll();
+    public List<UsuarioMostrarDTO> obtenerTodosUsuarios(){
+        List<Usuario> usuarios = repository.findAll();
+        List<UsuarioMostrarDTO> dtos = new ArrayList<>();
+
+        for(Usuario usuario : usuarios){
+            UsuarioMostrarDTO dto = new UsuarioMostrarDTO();
+            dto.setId(usuario.getId());
+            dto.setPassword(usuario.getPassword());
+            dto.setRol(usuario.getRol());
+            dto.setEmail(usuario.getEmail());
+            dto.setAddresses(usuario.getAddresses());
+            dto.setRecoveryCode(usuario.getRecoveryCode());
+            dto.setName(usuario.getName());
+            dto.setSurnames(usuario.getSurnames());
+            dto.setPhoneNumber(usuario.getPhoneNumber());
+            dto.setVerificationCode(usuario.getVerificationCode());
+            dtos.add(dto);
+        }
+
+        return dtos;
     }
 
     public Usuario obtenerUsuariosPorId(@PathVariable Integer id){
@@ -35,7 +58,6 @@ public class UsuarioService  { //implements IUsuarioServices, UserDetailsService
         newUsuario.setSurnames(dto.getSurnames());
         newUsuario.setPhoneNumber(dto.getPhoneNumber());
         newUsuario.setEmail(dto.getEmail());
-        newUsuario.setUsername(dto.getEmail());
         newUsuario.setPassword(dto.getPassword());
         newUsuario.setAddresses(dto.getAddresses());
         newUsuario.setEnabled(true);
@@ -52,7 +74,6 @@ public class UsuarioService  { //implements IUsuarioServices, UserDetailsService
             updateUsuario.setSurnames(dto.getSurnames());
             updateUsuario.setPhoneNumber(dto.getPhoneNumber());
             updateUsuario.setEmail(dto.getEmail());
-            updateUsuario.setUsername(dto.getEmail());
             updateUsuario.setPassword(dto.getPassword());
             updateUsuario.setAddresses(dto.getAddresses());
             updateUsuario.setEnabled(true);

@@ -27,8 +27,5 @@ public class PedidoLine {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "pedido_line_id")
-    private PedidoLine pedidoLine;
 
 }
