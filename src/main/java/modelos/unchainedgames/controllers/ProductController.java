@@ -1,7 +1,6 @@
 package modelos.unchainedgames.controllers;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import modelos.unchainedgames.dto.ProductCreateDTO;
 import modelos.unchainedgames.models.Product;
 import modelos.unchainedgames.services.ProductService;
@@ -17,12 +16,12 @@ public class ProductController {
     private ProductService service;
 
     @GetMapping("/all")
-    public List<Product> obtenerTodosPedidos(){
+    public List<Product> obtenerTodosProductos(){
         return service.obtenerTodosProductos();
     }
 
     @GetMapping("/{id}")
-    public Product obtenerPedidosPorId(@PathVariable Integer id){
+    public Product obtenerProductosPorId(@PathVariable Integer id){
         return service.obtenerProductosPorId(id);
     }
 

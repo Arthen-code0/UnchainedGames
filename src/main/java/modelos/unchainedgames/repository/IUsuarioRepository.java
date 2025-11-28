@@ -11,15 +11,11 @@ import java.util.Optional;
 
 public interface IUsuarioRepository extends JpaRepository<Usuario, Integer> {
 
-//    Optional<Usuario> findTopByUsername(String username);
+    // Buscar usuario por email
+    @Query("SELECT u FROM Usuario u WHERE u.email = :email")
+    Optional<Usuario> findByEmail(@Param("email") String email);
 
-
-//    @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.verificationCode = :verificationCode")
-//    Optional<Usuario> findByEmailAndVerificationCode(@Param("email") String email,
-//                                                     @Param("verificationCode") String verificationCode);
-//
-//    @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.recoveryCode = :recoveryCode")
-//    Optional<Usuario> findByEmailAndRecoveryCode(@Param("email") String email,
-//                                                 @Param("recoveryCode") String recoveryCode);
-
+    // Verificar si existe un usuario con ese email
+    @Query("SELECT COUNT(u) > 0 FROM Usuario u WHERE u.email = :email")
+    boolean existsByEmail(@Param("email") String email);
 }
