@@ -9,7 +9,4 @@ import java.util.List;
 
 public interface IAddressRepository extends JpaRepository<Address, Integer> {
 
-    @Query(value = "SELECT * FROM address a WHERE a.city = :city", nativeQuery = true)
-    List<Address> obtenerTodasDireccionesPorCiudad(@Param("city") String city);
-
 }

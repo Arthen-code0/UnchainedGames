@@ -1,7 +1,9 @@
 package modelos.unchainedgames.services;
 
 import lombok.AllArgsConstructor;
+import modelos.unchainedgames.controllers.AddressController;
 import modelos.unchainedgames.dto.AddressCreateDTO;
+import modelos.unchainedgames.dto.DTOConverter;
 import modelos.unchainedgames.models.Address;
 import modelos.unchainedgames.repository.IAddressRepository;
 import org.springframework.stereotype.Service;
@@ -12,59 +14,67 @@ import java.util.List;
 @AllArgsConstructor
 public class AddressService {
 
-    private IAddressRepository repository;
+    private final IAddressRepository repository;
+    private final DTOConverter converter;
 
-//    public List<Address> obtenerTodasDirecciones(){
-//
-//        List<Address> address = repository.findAll();
-//        List<AddressCreateDTO> list = new ArrayList<>();
-//        for(Address a : address){
-//            AddressCreateDTO dto = new AddressCreateDTO();
-//
-//        }
-//    }
 
-    public List<Address> obtenerTodasDirecciones() {
-        return repository.findAll();
+    public AddressCreateDTO obtenerDireccionPorId(Integer id) {
+        return repository.findById(id)
+                .map(address -> converter.toDto(address, this::toMostrarDTO))
+                .orElse(null);
     }
 
-    public Address obtenerDireccionPorId(Integer id){
-        return repository.findById(id).orElse(null);
+    public List<AddressCreateDTO> obtenerTodasDirecciones() {
+        return converter.toDtoList(
+                repository.findAll(),
+                this::toMostrarDTO
+        );
     }
 
-    public void createAddress(AddressCreateDTO dto){
-        Address newAddress = new Address();
-
-        newAddress.setPostalCode(dto.getPostalCode());
-        newAddress.setStreet(dto.getStreet());
-        newAddress.setNumber(dto.getNumber());
-        newAddress.setFloor(dto.getFloor());
-        newAddress.setCity(dto.getCity());
-        newAddress.setProvince(dto.getProvince());
-
-        repository.save(newAddress);
+    public AddressCreateDTO createAddress(AddressCreateDTO dto) {
+        Address address = toEntity(dto);
+        address = repository.save(address);
+        return toMostrarDTO(address);
     }
 
-    public void updateAddress(Integer id, AddressCreateDTO dto){
-        Address updatedAddress = repository.findById(id).orElse(null);
+    public AddressCreateDTO updateAddress(Integer id, AddressCreateDTO dto) {
+        Address address = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Address not found"));
 
-        if (updatedAddress != null){
-            updatedAddress.setPostalCode(dto.getPostalCode());
-            updatedAddress.setStreet(dto.getStreet());
-            updatedAddress.setNumber(dto.getNumber());
-            updatedAddress.setFloor(dto.getFloor());
-            updatedAddress.setCity(dto.getCity());
-            updatedAddress.setProvince(dto.getProvince());
+        // Actualizar campos
+        address.setStreet(dto.getStreet());
+        address.setCity(dto.getCity());
+        address.setStreet(dto.getStreet());
+        address.setCity(dto.getCity());
+        address.setPostalCode(dto.getPostalCode());
 
-            repository.save(updatedAddress);
-        }
+        address = repository.save(address);
+        return toMostrarDTO(address);
     }
 
-    public void deleteAddress(Integer id){
+    public void deleteAddress(Integer id) {
         repository.deleteById(id);
     }
 
-    public List<Address> obtenerDireccionesPorCiudad(String city) {
-        return repository.obtenerTodasDireccionesPorCiudad(city);
+    // Métodos de conversión internos (pueden ser privados)
+    private Address toEntity(AddressCreateDTO dto) {
+        Address address = new Address();
+        address.setStreet(dto.getStreet());
+        address.setCity(dto.getCity());
+        address.setStreet(dto.getStreet());
+        address.setCity(dto.getCity());
+        address.setPostalCode(dto.getPostalCode());
+        return address;
+    }
+
+    private AddressCreateDTO toMostrarDTO(Address address) {
+        AddressCreateDTO dto = new AddressCreateDTO();
+        dto.setId(address.getId());
+        dto.setStreet(address.getStreet());
+        dto.setCity(address.getCity());
+        dto.setStreet(address.getStreet());
+        dto.setCity(address.getCity());
+        dto.setPostalCode(address.getPostalCode());
+        return dto;
     }
 }

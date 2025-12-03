@@ -3,7 +3,13 @@ package modelos.unchainedgames.models;
 import jakarta.persistence.*;
 import lombok.*;
 import modelos.unchainedgames.listed.Rol;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -14,7 +20,7 @@ import java.util.Set;
 @EqualsAndHashCode
 @Entity
 @Table(name = "usuario", schema = "unchainedgames", catalog = "postgres")
-public class Usuario  { //implements UserDetails
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,18 +41,12 @@ public class Usuario  { //implements UserDetails
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "rol", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
     private Rol rol = Rol.USUARIO;
 
     @Column(name = "enabled")
-    private Boolean enabled;
-
-    @Column(name = "verificationCode")
-    private String verificationCode;
-
-    @Column(name = "recoveryCode")
-    private String recoveryCode;
+    private Boolean enabled = true;
 
     @ManyToMany
     @JoinTable(
@@ -57,33 +57,14 @@ public class Usuario  { //implements UserDetails
     )
     private Set<Address> addresses;
 
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return Collections.singletonList(new SimpleGrantedAuthority(this.rol.name()));
-//    }
-//
-//    @Override
-//    public String getUsername() {
-//        return this.username;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonExpired() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonLocked() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isCredentialsNonExpired() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isEnabled() {
-//        return true;
-//    }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return new ArrayList<>(List.of(new SimpleGrantedAuthority(this.rol.name()))); //Se crea una coleccion para meter dentro los roles de usuario
+    }
+
+    @Override
+    public String getUsername() {
+        return this.name;
+    }
+
 }

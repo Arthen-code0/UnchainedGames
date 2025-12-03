@@ -11,6 +11,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddressCreateDTO {
+    private Integer id;
     private Integer postalCode;
     private String street;
     private Integer number;

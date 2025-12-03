@@ -17,20 +17,14 @@ public class AddressController {
     private AddressService service;
 
     @GetMapping("/all")
-    public List<Address> obtenerTodasDirecciones(){
+    public List<AddressCreateDTO> obtenerTodasDirecciones(){
         return service.obtenerTodasDirecciones();
     }
 
     @GetMapping("/{id}")
-    public Address obtenerDireccionPorId(@PathVariable Integer id){
+    public AddressCreateDTO obtenerDireccionPorId(@PathVariable Integer id){
         return service.obtenerDireccionPorId(id);
-    }
-
-    @GetMapping("/city/{city}")  // Endpoint para buscar por ciudad
-    public ResponseEntity<List<Address>> obtenerDireccionesPorCiudad(@PathVariable String city){
-        List<Address> addresses = service.obtenerDireccionesPorCiudad(city);
-        return ResponseEntity.ok(addresses);
-    }
+    } 
 
     @PostMapping("/create")
     public void createAddress(@RequestBody AddressCreateDTO dto) {
