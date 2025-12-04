@@ -1,15 +1,10 @@
 package modelos.unchainedgames.dto;
 
 import lombok.*;
-import modelos.unchainedgames.models.Category;
-import modelos.unchainedgames.models.Language;
-import modelos.unchainedgames.models.Mechanics;
 
 import java.util.Set;
 
 @Data
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductCreateDTO {
@@ -25,9 +20,8 @@ public class ProductCreateDTO {
     private String boxSize;
     private String difficulty;
     private String description;
+
     private Set<Integer> mechanicsIds;
-    private Set<Integer> categoryIds;
-    private Set<Integer> languageIds;
-
-
+    private Set<Integer> categoriesIds;
+    private Set<Integer> languagesIds;
 }

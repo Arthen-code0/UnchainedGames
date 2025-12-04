@@ -34,14 +34,13 @@ public class UsuarioService implements UserDetailsService {
         for(Usuario usuario : usuarios){
             UsuarioMostrarDTO dto = new UsuarioMostrarDTO();
             dto.setId(usuario.getId());
-            dto.setPassword(usuario.getPassword());
             dto.setRol(usuario.getRol());
             dto.setEmail(usuario.getEmail());
-            dto.setAddresses(usuario.getAddresses());
             dto.setName(usuario.getName());
             dto.setSurnames(usuario.getSurnames());
             dto.setPhoneNumber(usuario.getPhoneNumber());
-            dtos.add(dto);
+            dto.setEnabled(usuario.getEnabled());
+
         }
 
         return dtos;
