@@ -9,31 +9,15 @@ import java.util.Set;
 
 @Data
 public class UsuarioMostrarDTO {
-
     private Integer id;
-
     private String name;
-
     private String surnames;
-
     private String username;
-
     private String email;
-
-    private String password;
-
     private String phoneNumber;
-
     private String profilePhoto;
-
-    private Rol rol = Rol.USUARIO;
-
+    private Rol rol;
     private Boolean enabled;
-
-    private String verificationCode;
-
-    private String recoveryCode;
-
-    private Set<Address> addresses;
-
+    private Set<AddressCreateDTO> addresses;
 }
+

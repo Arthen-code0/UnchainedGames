@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req -> req
                         .requestMatchers("/usuario/login").permitAll()
                         .requestMatchers("/usuario/create").permitAll()
+                        .requestMatchers("/product/all").permitAll()
                         .requestMatchers("/product/update").hasAnyAuthority("ADMIN")
                         .anyRequest().permitAll())
                 .authenticationProvider(authenticationProvider)

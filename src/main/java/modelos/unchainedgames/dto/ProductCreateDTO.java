@@ -25,8 +25,9 @@ public class ProductCreateDTO {
     private String boxSize;
     private String difficulty;
     private String description;
-    private Set<Mechanics> mechanics;
-    private Set<Category> categories;
-    private Set<Language> languages;
+    private Set<Integer> mechanicsIds;
+    private Set<Integer> categoryIds;
+    private Set<Integer> languageIds;
+
 
 }
