@@ -26,15 +26,15 @@ public class ProductService {
     private ICategoryRepository categoryRepository;
 
 
-    public List<Product> obtenerTodosProductos(){
+    public List<Product> obtenerTodosProductos() {
         return repository.findAll();
     }
 
-    public Product obtenerProductosPorId(Integer id){
+    public Product obtenerProductosPorId(Integer id) {
         return repository.findById(id).orElse(null);
     }
 
-    public void createProduct(ProductCreateDTO dto){
+    public void createProduct(ProductCreateDTO dto) {
 
         Product newProduct = new Product();
 
@@ -73,44 +73,50 @@ public class ProductService {
         repository.save(newProduct);
     }
 
+    // ✅ MÉTODO UPDATE ARREGLADO
+    public Product updateProduct(Integer id, ProductCreateDTO dto) {
 
-    public void updateProduct(Integer id, ProductCreateDTO dto){
+        // Usamos el atributo "repository", no la interfaz
+        Product product = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        Product updatedProduct = repository.findById(id).orElse(null);
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setStock(dto.getStock());
+        product.setRecommendedAge(dto.getRecommendedAge());
+        product.setPlayerMin(dto.getPlayerMin());
+        product.setPlayerMax(dto.getPlayerMax());
+        product.setDuration(dto.getDuration());
+        product.setPicture(dto.getPicture());
+        product.setBoxSize(dto.getBoxSize());
+        product.setDifficulty(dto.getDifficulty());
 
-        if (updatedProduct == null) return;
+        // 👇 MUY IMPORTANTE: proteger las listas de IDs
+        // y convertir a Set como en createProduct
 
-        // Campos simples
-        updatedProduct.setName(dto.getName());
-        updatedProduct.setPicture(dto.getPicture());
-        updatedProduct.setPlayerMin(dto.getPlayerMin());
-        updatedProduct.setPlayerMax(dto.getPlayerMax());
-        updatedProduct.setDuration(dto.getDuration());
-        updatedProduct.setRecommendedAge(dto.getRecommendedAge());
-        updatedProduct.setPrice(dto.getPrice());
-        updatedProduct.setStock(dto.getStock());
-        updatedProduct.setBoxSize(dto.getBoxSize());
-        updatedProduct.setDifficulty(dto.getDifficulty());
-        updatedProduct.setDescription(dto.getDescription());
+        if (dto.getMechanicsIds() != null) {
+            Set<Mechanics> mechanics =
+                    new HashSet<>(mechanicsRepository.findAllById(dto.getMechanicsIds()));
+            product.setMechanics(mechanics);
+        }
 
-        // Relaciones
-        Set<Mechanics> mechanics =
-                new HashSet<>(mechanicsRepository.findAllById(dto.getMechanicsIds()));
+        if (dto.getCategoriesIds() != null) {
+            Set<Category> categories =
+                    new HashSet<>(categoryRepository.findAllById(dto.getCategoriesIds()));
+            product.setCategories(categories);
+        }
 
-        Set<Category> categories =
-                new HashSet<>(categoryRepository.findAllById(dto.getCategoriesIds()));
+        if (dto.getLanguagesIds() != null) {
+            Set<Language> languages =
+                    new HashSet<>(languageRepository.findAllById(dto.getLanguagesIds()));
+            product.setLanguages(languages);
+        }
 
-        Set<Language> languages =
-                new HashSet<>(languageRepository.findAllById(dto.getLanguagesIds()));
-
-        updatedProduct.setMechanics(mechanics);
-        updatedProduct.setCategories(categories);
-        updatedProduct.setLanguages(languages);
-
-        repository.save(updatedProduct);
+        return repository.save(product);
     }
 
-    public void deleteProduct(Integer id){
+    public void deleteProduct(Integer id) {
         repository.deleteById(id);
     }
 }
