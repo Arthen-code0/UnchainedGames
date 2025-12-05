@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ProductController {
 
-    private ProductService service;
+    private final ProductService service;
 
     @GetMapping("/all")
     public List<Product> obtenerTodosProductos(){
@@ -39,4 +39,14 @@ public class ProductController {
     public void deleteProduct(@PathVariable Integer id) {
         service.deleteProduct(id);
     }
+
+    @GetMapping("/search")
+    public List<Product> searchProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) List<String> languages
+    ) {
+        return service.searchProducts(name, languages);
+    }
+
+
 }

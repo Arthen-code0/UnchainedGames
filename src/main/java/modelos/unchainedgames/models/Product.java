@@ -52,25 +52,6 @@ public class Product {
     private String description;
 
     // --- Relaciones ---
-
-    @ManyToMany
-    @JoinTable(
-            name = "product_mechanics",
-            schema = "unchainedgames",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "mechanics_id")
-    )
-    private Set<Mechanics> mechanics;
-
-    @ManyToMany
-    @JoinTable(
-            name = "product_category",
-            schema = "unchainedgames",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private Set<Category> categories;
-
     @ManyToMany
     @JoinTable(
             name = "product_language",

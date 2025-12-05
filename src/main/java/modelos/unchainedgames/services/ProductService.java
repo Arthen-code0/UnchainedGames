@@ -2,13 +2,9 @@ package modelos.unchainedgames.services;
 
 import lombok.AllArgsConstructor;
 import modelos.unchainedgames.dto.ProductCreateDTO;
-import modelos.unchainedgames.models.Category;
 import modelos.unchainedgames.models.Language;
-import modelos.unchainedgames.models.Mechanics;
 import modelos.unchainedgames.models.Product;
-import modelos.unchainedgames.repository.ICategoryRepository;
 import modelos.unchainedgames.repository.ILanguageRepository;
-import modelos.unchainedgames.repository.IMechanicsRepository;
 import modelos.unchainedgames.repository.IProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +18,6 @@ public class ProductService {
 
     private IProductRepository repository;
     private ILanguageRepository languageRepository;
-    private IMechanicsRepository mechanicsRepository;
-    private ICategoryRepository categoryRepository;
 
 
     public List<Product> obtenerTodosProductos() {
@@ -51,19 +45,6 @@ public class ProductService {
         newProduct.setDescription(dto.getDescription());
 
         // 👇 SOLO cargamos relaciones si el DTO trae IDs
-
-        if (dto.getMechanicsIds() != null && !dto.getMechanicsIds().isEmpty()) {
-            Set<Mechanics> mechanics =
-                    new HashSet<>(mechanicsRepository.findAllById(dto.getMechanicsIds()));
-            newProduct.setMechanics(mechanics);
-        }
-
-        if (dto.getCategoriesIds() != null && !dto.getCategoriesIds().isEmpty()) {
-            Set<Category> categories =
-                    new HashSet<>(categoryRepository.findAllById(dto.getCategoriesIds()));
-            newProduct.setCategories(categories);
-        }
-
         if (dto.getLanguagesIds() != null && !dto.getLanguagesIds().isEmpty()) {
             Set<Language> languages =
                     new HashSet<>(languageRepository.findAllById(dto.getLanguagesIds()));
@@ -73,7 +54,6 @@ public class ProductService {
         repository.save(newProduct);
     }
 
-    // ✅ MÉTODO UPDATE ARREGLADO
     public Product updateProduct(Integer id, ProductCreateDTO dto) {
 
         // Usamos el atributo "repository", no la interfaz
@@ -94,19 +74,6 @@ public class ProductService {
 
         // 👇 MUY IMPORTANTE: proteger las listas de IDs
         // y convertir a Set como en createProduct
-
-        if (dto.getMechanicsIds() != null) {
-            Set<Mechanics> mechanics =
-                    new HashSet<>(mechanicsRepository.findAllById(dto.getMechanicsIds()));
-            product.setMechanics(mechanics);
-        }
-
-        if (dto.getCategoriesIds() != null) {
-            Set<Category> categories =
-                    new HashSet<>(categoryRepository.findAllById(dto.getCategoriesIds()));
-            product.setCategories(categories);
-        }
-
         if (dto.getLanguagesIds() != null) {
             Set<Language> languages =
                     new HashSet<>(languageRepository.findAllById(dto.getLanguagesIds()));
@@ -118,5 +85,33 @@ public class ProductService {
 
     public void deleteProduct(Integer id) {
         repository.deleteById(id);
+    }
+
+    public List<Product> searchProducts(String name, List<String> languages) {
+
+        String normalizedName = (name == null || name.trim().isEmpty())
+                ? null
+                : name.trim().toLowerCase();
+
+        boolean hasName = normalizedName != null;
+        boolean hasLanguages = (languages != null && !languages.isEmpty());
+
+        // ⛔ Sin filtros → todo catálogo
+        if (!hasName && !hasLanguages) {
+            return repository.findAll();
+        }
+
+        // 🔍 Nombre + idiomas
+        if (hasName && hasLanguages) {
+            return repository.searchByNameAndLanguages(normalizedName, languages);
+        }
+
+        // 🔍 Solo nombre
+        if (hasName) {
+            return repository.searchByName(normalizedName);
+        }
+
+        // 🔍 Solo idiomas
+        return repository.searchByLanguages(languages);
     }
 }
