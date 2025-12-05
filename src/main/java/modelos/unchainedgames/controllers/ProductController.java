@@ -5,6 +5,7 @@ import modelos.unchainedgames.dto.ProductCreateDTO;
 import modelos.unchainedgames.models.Product;
 import modelos.unchainedgames.services.ProductService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,6 +36,14 @@ public class ProductController {
         service.updateProduct(id, dto);
     }
 
+    @PutMapping("/update/{id}/picture")
+    public Product updateProductPicture(
+            @PathVariable Integer id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        return service.updateProductPicture(id, file);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Integer id) {
         service.deleteProduct(id);
@@ -47,6 +56,4 @@ public class ProductController {
     ) {
         return service.searchProducts(name, languages);
     }
-
-
 }

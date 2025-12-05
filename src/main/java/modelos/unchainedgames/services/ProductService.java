@@ -7,9 +7,12 @@ import modelos.unchainedgames.models.Product;
 import modelos.unchainedgames.repository.ILanguageRepository;
 import modelos.unchainedgames.repository.IProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -18,6 +21,7 @@ public class ProductService {
 
     private IProductRepository repository;
     private ILanguageRepository languageRepository;
+    private CloudinaryService cloudinaryService; //añado Cloudinary
 
 
     public List<Product> obtenerTodosProductos() {
@@ -33,7 +37,7 @@ public class ProductService {
         Product newProduct = new Product();
 
         newProduct.setName(dto.getName());
-        newProduct.setPicture(dto.getPicture());
+        newProduct.setPicture(dto.getPicture()); // ahora mismo texto; luego si quieres lo cambiamos a file también
         newProduct.setPlayerMin(dto.getPlayerMin());
         newProduct.setPlayerMax(dto.getPlayerMax());
         newProduct.setDuration(dto.getDuration());
@@ -68,9 +72,9 @@ public class ProductService {
         product.setPlayerMin(dto.getPlayerMin());
         product.setPlayerMax(dto.getPlayerMax());
         product.setDuration(dto.getDuration());
-        product.setPicture(dto.getPicture());
         product.setBoxSize(dto.getBoxSize());
         product.setDifficulty(dto.getDifficulty());
+        product.setPicture(dto.getPicture()); // aquí de momento solo texto (no Cloudinary)
 
         // 👇 MUY IMPORTANTE: proteger las listas de IDs
         // y convertir a Set como en createProduct
@@ -81,6 +85,28 @@ public class ProductService {
         }
 
         return repository.save(product);
+    }
+
+    public Product updateProductPicture(Integer id, MultipartFile file) {
+
+        Product product = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("El archivo de imagen está vacío");
+        }
+
+        try {
+            Map<String, Object> uploadResult = cloudinaryService.uploadFile(file);
+            String secureUrl = (String) uploadResult.get("secure_url");
+
+            product.setPicture(secureUrl);
+
+            return repository.save(product);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error subiendo imagen a Cloudinary", e);
+        }
     }
 
     public void deleteProduct(Integer id) {
