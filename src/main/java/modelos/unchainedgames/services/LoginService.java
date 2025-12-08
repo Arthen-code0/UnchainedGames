@@ -1,30 +1,32 @@
 package modelos.unchainedgames.services;
 
-import lombok.AllArgsConstructor;
-import modelos.unchainedgames.dto.LoginCreateDTO;
+import lombok.RequiredArgsConstructor;
 import modelos.unchainedgames.models.Usuario;
-import modelos.unchainedgames.repository.IUsuarioRepository;
 import modelos.unchainedgames.security.JWTService;
-import modelos.unchainedgames.security.MecanismoSeguridad;
+import modelos.unchainedgames.dto.LoginCreateDTO;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LoginService {
 
-    private IUsuarioRepository repository;
-    private MecanismoSeguridad seguridad;
-    private JWTService jwtService;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtService;
 
+    public String loguearUsuario(LoginCreateDTO dto) {
 
-    public String loguearUsuario(LoginCreateDTO dto){
-        Usuario usuario = repository.findTopByEmailEquals(dto.getEmail());
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        dto.getEmail(),   // username (email)
+                        dto.getPassword() // contraseña en texto plano
+                )
+        );
 
-        if (usuario != null && seguridad.GetPasswordEncoder().matches(dto.getPassword(), usuario.getPassword())){
-            return jwtService.generateToken(usuario);
-        }
+        Usuario usuario = (Usuario) auth.getPrincipal();
 
-        return "Fallo de Autenticacion";
+        return jwtService.generateToken(usuario);
     }
 }

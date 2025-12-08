@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -22,9 +23,6 @@ public class JWTService {
 
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     public String generateToken(Usuario usuario){
         TokenDataDTO datos = TokenDataDTO
@@ -70,9 +68,9 @@ public class JWTService {
     }
 
 
-    private Key getSignInKey(){
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private Key getSignInKey() {
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes); // HS256 -> mínimo 32 bytes, tu clave los cumple
     }
 
 }
