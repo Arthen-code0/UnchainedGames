@@ -33,7 +33,4 @@ public class MecanismoSeguridad {
     public PasswordEncoder GetPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-
-
 }

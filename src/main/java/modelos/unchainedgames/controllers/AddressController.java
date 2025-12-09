@@ -2,9 +2,7 @@ package modelos.unchainedgames.controllers;
 
 import lombok.AllArgsConstructor;
 import modelos.unchainedgames.dto.AddressCreateDTO;
-import modelos.unchainedgames.models.Address;
 import modelos.unchainedgames.services.AddressService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
