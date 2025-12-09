@@ -19,45 +19,60 @@ import java.io.IOException;
 @AllArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
-    private JWTService jwtService;
-    private UsuarioService usuarioService;
+    private final JWTService jwtService;
+    private final UsuarioService usuarioService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
         final String requestPath = request.getServletPath();
 
-        if (requestPath.contains("/usuario/login") || requestPath.contains("/usuario/create")) {
+        // ⛔️ SOLO IGNORAMOS EL LOGIN, NO EL CREATE
+        if (requestPath.contains("/usuario/login")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if(authHeader== null || !authHeader.startsWith("Bearer")){
-            filterChain.doFilter(request,response);
+        // Si no hay Authorization o no empieza por Bearer, seguimos sin autenticar
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
             return;
         }
 
+        // Quitamos "Bearer " y nos quedamos con el token
         String token = authHeader.substring(7);
         TokenDataDTO datos = jwtService.extractTokenData(token);
 
-        if(datos!=null && SecurityContextHolder.getContext().getAuthentication() == null && !jwtService.isExpired(token)){
+        // Si el token es válido, no está expirado y todavía no hay autenticación en el contexto…
+        if (datos != null
+                && SecurityContextHolder.getContext().getAuthentication() == null
+                && !jwtService.isExpired(token)) {
 
-
+            // Cargamos el usuario desde la BD usando el mail/username del token
             Usuario usuario = (Usuario) usuarioService.loadUserByUsername(datos.getMailUsername());
 
+            if (usuario != null) {
+                // Creamos el objeto de autenticación con sus authorities (roles)
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                usuario,                      // principal (usuario)
+                                null,                         // no necesitamos la password aquí
+                                usuario.getAuthorities()      // roles: ADMIN / USUARIO
+                        );
 
-            if(usuario!= null){
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        usuario.getUsername(),
-                        usuario.getPassword(),
-                        usuario.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                // Guardamos la autenticación en el contexto de Spring Security
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-
         }
 
+        // Continuamos la cadena de filtros
         filterChain.doFilter(request, response);
     }
 }
