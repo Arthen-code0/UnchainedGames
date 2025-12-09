@@ -1,59 +1,135 @@
 package modelos.unchainedgames.services;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import modelos.unchainedgames.dto.ReviewCreateDTO;
+import modelos.unchainedgames.dto.ReviewMostrarDTO;
+import modelos.unchainedgames.models.Product;
 import modelos.unchainedgames.models.Review;
+import modelos.unchainedgames.models.Usuario;
+import modelos.unchainedgames.repository.IProductRepository;
 import modelos.unchainedgames.repository.IReviewRepository;
+import modelos.unchainedgames.repository.IUsuarioRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ReviewService {
 
-    private IReviewRepository repository;
+    private final IReviewRepository reviewRepository;
+    private final IUsuarioRepository usuarioRepository;
+    private final IProductRepository productRepository;
 
-    public List<Review> obtenerTodosProductos(){
-        return repository.findAll();
+    // 🔹 Crear reseña para el producto indicado
+    public void createReview(ReviewCreateDTO dto) {
+
+        // Obtenemos el usuario logueado a partir del SecurityContext
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("Usuario no autenticado");
+        }
+
+        String email = auth.getName(); // getName() devuelve el username (tu Usuario.getUsername() = email)
+        Usuario usuario = usuarioRepository.findTopByEmailEquals(email);
+        if (usuario == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        Product product = productRepository.findById(dto.getProductId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        Review review = new Review();
+        review.setScore(dto.getScore());
+        review.setDescription(dto.getDescription());
+        review.setDatetime(LocalDate.now());
+        review.setUsuario(usuario);
+        review.setProduct(product);
+
+        reviewRepository.save(review);
     }
 
-    public Review obtenerProductosPorId(@PathVariable Integer id){
+    // 🔹 Listar reseñas de un producto
+    public List<ReviewMostrarDTO> getReviewsByProduct(Integer productId) {
 
-        Review review = repository.findById(id).orElse(null);
+        List<Review> reviews = reviewRepository.findByProductIdOrderByDatetimeDesc(productId);
 
-        return review;
+        return reviews.stream()
+                .map(this::toMostrarDTO)
+                .collect(Collectors.toList());
     }
 
-    public void createReview(ReviewCreateDTO dto){
+    private ReviewMostrarDTO toMostrarDTO(Review review) {
+        ReviewMostrarDTO dto = new ReviewMostrarDTO();
+        dto.setId(review.getId());
+        dto.setScore(review.getScore());
+        dto.setDescription(review.getDescription());
+        dto.setDatetime(review.getDatetime());
 
-        Review newReview = new Review();
+        Usuario u = review.getUsuario();
+        dto.setUsuarioId(u.getId());
+        dto.setUsuarioName(u.getName() + " " + u.getSurnames());
 
-        newReview.setScore(dto.getScore());
-        newReview.setDescription(dto.getDescription());
-        newReview.setDatetime(dto.getLocaldate());
-        newReview.setProduct(dto.getProduct());
-        newReview.setUsuario(dto.getUsuario());
+        dto.setProductId(review.getProduct().getId());
+        dto.setProductName(review.getProduct().getName());
 
-        repository.save(newReview);
+        return dto;
     }
 
-    public void updateReview(Integer id, ReviewCreateDTO dto){
+    // (Opcionales) listar todas, obtener por id, etc. si te interesa
 
-        Review updateReview = repository.findById(id).orElse(null);
-
-        updateReview.setScore(dto.getScore());
-        updateReview.setDescription(dto.getDescription());
-        updateReview.setDatetime(dto.getLocaldate());
-        updateReview.setProduct(dto.getProduct());
-        updateReview.setUsuario(dto.getUsuario());
-
-        repository.save(updateReview);
+    public List<ReviewMostrarDTO> obtenerTodosProductos() {
+        return reviewRepository.findAll()
+                .stream()
+                .map(this::toMostrarDTO)
+                .collect(Collectors.toList());
     }
 
-    public void deleteReview(Integer id){
-        repository.deleteById(id);
+    public ReviewMostrarDTO obtenerProductosPorId(Integer id) {
+        Review r = reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Review no encontrada"));
+        return toMostrarDTO(r);
     }
 
+    public void updateReview(Integer id, ReviewCreateDTO dto) {
+        Review r = reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Review no encontrada"));
+
+        r.setScore(dto.getScore());
+        r.setDescription(dto.getDescription());
+        // datetime podría quedarse igual o actualizarse:
+        // r.setDatetime(LocalDate.now());
+
+        reviewRepository.save(r);
+    }
+
+    public void deleteReview(Integer id) {
+        reviewRepository.deleteById(id);
+    }
+
+    public List<ReviewMostrarDTO> getReviewsByCurrentUser() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("Usuario no autenticado");
+        }
+
+        String email = auth.getName(); // tu Usuario.getUsername() devuelve email
+        Usuario usuario = usuarioRepository.findTopByEmailEquals(email);
+        if (usuario == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        List<Review> reviews =
+                reviewRepository.findByUsuarioIdOrderByDatetimeDesc(usuario.getId());
+
+        return reviews.stream()
+                .map(this::toMostrarDTO)
+                .collect(Collectors.toList());
+    }
 }

@@ -32,8 +32,9 @@ public class JWTFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String requestPath = request.getServletPath();
 
-        // ⛔️ SOLO IGNORAMOS EL LOGIN, NO EL CREATE
-        if (requestPath.contains("/usuario/login")) {
+        // 👉 RUTAS QUE NO PASAN POR JWT (públicas)
+        if (requestPath.startsWith("/usuario/login")
+                || requestPath.startsWith("/solicitudes-empleo")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -44,35 +45,28 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Quitamos "Bearer " y nos quedamos con el token
         String token = authHeader.substring(7);
         TokenDataDTO datos = jwtService.extractTokenData(token);
 
-        // Si el token es válido, no está expirado y todavía no hay autenticación en el contexto…
         if (datos != null
                 && SecurityContextHolder.getContext().getAuthentication() == null
                 && !jwtService.isExpired(token)) {
 
-            // Cargamos el usuario desde la BD usando el mail/username del token
             Usuario usuario = (Usuario) usuarioService.loadUserByUsername(datos.getMailUsername());
 
             if (usuario != null) {
-                // Creamos el objeto de autenticación con sus authorities (roles)
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
-                                usuario,                      // principal (usuario)
-                                null,                         // no necesitamos la password aquí
-                                usuario.getAuthorities()      // roles: ADMIN / USUARIO
+                                usuario,
+                                null,
+                                usuario.getAuthorities()
                         );
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Guardamos la autenticación en el contexto de Spring Security
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
-        // Continuamos la cadena de filtros
         filterChain.doFilter(request, response);
     }
 }

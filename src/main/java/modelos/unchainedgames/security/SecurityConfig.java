@@ -33,28 +33,32 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(auth -> auth
-                        // 🔓 LOGIN: público siempre
+                        // -------- RUTAS PÚBLICAS --------
                         .requestMatchers(HttpMethod.POST, "/usuario/login").permitAll()
-
-                        // 🔓 REGISTRO: solo usuarios anónimos (no logueados)
                         .requestMatchers(HttpMethod.POST, "/usuario/create").anonymous()
 
-                        // 🔓 VER PRODUCTOS: público (catálogo, detalle)
                         .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
 
-                        // 🔒 CREAR / EDITAR / BORRAR PRODUCTOS: solo ADMIN
+                        // 👉 TODAS las rutas de solicitudes de empleo son públicas
+                        .requestMatchers("/solicitudes-empleo/**").permitAll()
+
+                        // -------- RUTAS RESTRINGIDAS --------
                         .requestMatchers(HttpMethod.POST, "/product/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/product/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/product/**").hasAuthority("ADMIN")
 
-                        // 🔓 Preflight CORS
+                        .requestMatchers(HttpMethod.GET, "/review/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/review/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/review/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/review/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/review/**").authenticated()
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 🔒 CUALQUIER OTRA COSA: logueado (ADMIN o USUARIO)
+                        // CUALQUIER OTRA RUTA: autenticación obligatoria
                         .anyRequest().authenticated()
                 );
 
-        // 🧱 Filtro JWT: mete al usuario en el SecurityContext si el token es válido
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -62,7 +66,6 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:4200"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -71,7 +74,6 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-
         return source;
     }
 }
