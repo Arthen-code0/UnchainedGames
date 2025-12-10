@@ -4,19 +4,19 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
-@ToString
-
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "review", schema = "unchainedgames", catalog = "postgres")
 public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Integer id;
 
     @Column(name = "score")

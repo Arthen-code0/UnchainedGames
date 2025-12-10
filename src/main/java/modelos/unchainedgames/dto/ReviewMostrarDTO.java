@@ -21,4 +21,5 @@ public class ReviewMostrarDTO {
 
     private Integer productId;
     private String productName;
+    private String productPicture;
 }

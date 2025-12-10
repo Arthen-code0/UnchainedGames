@@ -3,6 +3,7 @@ package modelos.unchainedgames.services;
 import lombok.RequiredArgsConstructor;
 import modelos.unchainedgames.dto.ReviewCreateDTO;
 import modelos.unchainedgames.dto.ReviewMostrarDTO;
+import modelos.unchainedgames.mapper.ReviewMapper;
 import modelos.unchainedgames.models.Product;
 import modelos.unchainedgames.models.Review;
 import modelos.unchainedgames.models.Usuario;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,16 +26,16 @@ public class ReviewService {
     private final IProductRepository productRepository;
 
     // 🔹 Crear reseña para el producto indicado
-    public void createReview(ReviewCreateDTO dto) {
+    public ReviewMostrarDTO createReview(ReviewCreateDTO dto) {
 
-        // Obtenemos el usuario logueado a partir del SecurityContext
+        // Usuario logueado
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated()) {
             throw new RuntimeException("Usuario no autenticado");
         }
 
-        String email = auth.getName(); // getName() devuelve el username (tu Usuario.getUsername() = email)
+        String email = auth.getName();
         Usuario usuario = usuarioRepository.findTopByEmailEquals(email);
         if (usuario == null) {
             throw new RuntimeException("Usuario no encontrado");
@@ -51,67 +51,54 @@ public class ReviewService {
         review.setUsuario(usuario);
         review.setProduct(product);
 
-        reviewRepository.save(review);
+        Review saved = reviewRepository.save(review);
+
+        return ReviewMapper.toMostrarDTO(saved);
     }
 
     // 🔹 Listar reseñas de un producto
     public List<ReviewMostrarDTO> getReviewsByProduct(Integer productId) {
-
-        List<Review> reviews = reviewRepository.findByProductIdOrderByDatetimeDesc(productId);
-
-        return reviews.stream()
-                .map(this::toMostrarDTO)
-                .collect(Collectors.toList());
+        return reviewRepository.findByProductIdOrderByDatetimeDesc(productId)
+                .stream()
+                .map(ReviewMapper::toMostrarDTO)
+                .toList();
     }
 
-    private ReviewMostrarDTO toMostrarDTO(Review review) {
-        ReviewMostrarDTO dto = new ReviewMostrarDTO();
-        dto.setId(review.getId());
-        dto.setScore(review.getScore());
-        dto.setDescription(review.getDescription());
-        dto.setDatetime(review.getDatetime());
-
-        Usuario u = review.getUsuario();
-        dto.setUsuarioId(u.getId());
-        dto.setUsuarioName(u.getName() + " " + u.getSurnames());
-
-        dto.setProductId(review.getProduct().getId());
-        dto.setProductName(review.getProduct().getName());
-
-        return dto;
-    }
-
-    // (Opcionales) listar todas, obtener por id, etc. si te interesa
-
-    public List<ReviewMostrarDTO> obtenerTodosProductos() {
+    // 🔹 Listar todas las reviews
+    public List<ReviewMostrarDTO> obtenerTodasReviews() {
         return reviewRepository.findAll()
                 .stream()
-                .map(this::toMostrarDTO)
-                .collect(Collectors.toList());
+                .map(ReviewMapper::toMostrarDTO)
+                .toList();
     }
 
-    public ReviewMostrarDTO obtenerProductosPorId(Integer id) {
+    // 🔹 Obtener una review por id
+    public ReviewMostrarDTO obtenerReviewPorId(Integer id) {
         Review r = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review no encontrada"));
-        return toMostrarDTO(r);
+        return ReviewMapper.toMostrarDTO(r);
     }
 
-    public void updateReview(Integer id, ReviewCreateDTO dto) {
+    // 🔹 Actualizar review existente
+    public ReviewMostrarDTO updateReview(Integer id, ReviewCreateDTO dto) {
         Review r = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review no encontrada"));
 
         r.setScore(dto.getScore());
         r.setDescription(dto.getDescription());
-        // datetime podría quedarse igual o actualizarse:
+        // Si quieres actualizar la fecha:
         // r.setDatetime(LocalDate.now());
 
-        reviewRepository.save(r);
+        Review updated = reviewRepository.save(r);
+        return ReviewMapper.toMostrarDTO(updated);
     }
 
+    // 🔹 Borrar review
     public void deleteReview(Integer id) {
         reviewRepository.deleteById(id);
     }
 
+    // 🔹 Reviews del usuario logueado
     public List<ReviewMostrarDTO> getReviewsByCurrentUser() {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -119,17 +106,15 @@ public class ReviewService {
             throw new RuntimeException("Usuario no autenticado");
         }
 
-        String email = auth.getName(); // tu Usuario.getUsername() devuelve email
+        String email = auth.getName();
         Usuario usuario = usuarioRepository.findTopByEmailEquals(email);
         if (usuario == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
 
-        List<Review> reviews =
-                reviewRepository.findByUsuarioIdOrderByDatetimeDesc(usuario.getId());
-
-        return reviews.stream()
-                .map(this::toMostrarDTO)
-                .collect(Collectors.toList());
+        return reviewRepository.findByUsuarioIdOrderByDatetimeDesc(usuario.getId())
+                .stream()
+                .map(ReviewMapper::toMostrarDTO)
+                .toList();
     }
 }
