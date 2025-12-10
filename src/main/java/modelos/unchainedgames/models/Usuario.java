@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -41,12 +42,28 @@ public class Usuario implements UserDetails {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    // ✅ AÑADE ESTE CAMPO:
+    @Column(name = "username")
+    private String username;
+
     @Column(name = "rol", nullable = false)
     @Enumerated(EnumType.ORDINAL)
     private Rol rol = Rol.USUARIO;
 
     @Column(name = "enabled")
-    private Boolean enabled = true;
+    private Boolean enabled = false;
+
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "verification_code_expires_at")
+    private LocalDateTime verificationCodeExpiresAt;
+
+    @Column(name = "recovery_code")
+    private String recoveryCode;
+
+    @Column(name = "recovery_code_expires_at")
+    private LocalDateTime recoveryCodeExpiresAt;
 
     @ManyToMany
     @JoinTable(
@@ -64,7 +81,8 @@ public class Usuario implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.name;
+        return this.email;
     }
+
 
 }

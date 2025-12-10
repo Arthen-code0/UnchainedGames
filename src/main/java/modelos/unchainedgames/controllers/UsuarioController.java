@@ -5,8 +5,8 @@ import modelos.unchainedgames.dto.LoginCreateDTO;
 import modelos.unchainedgames.dto.UsuarioCreateDTO;
 import modelos.unchainedgames.dto.UsuarioMostrarDTO;
 import modelos.unchainedgames.models.Usuario;
-import modelos.unchainedgames.services.LoginService;
 import modelos.unchainedgames.services.UsuarioService;
+import modelos.unchainedgames.services.LoginService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +19,8 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:4200")
 public class UsuarioController {
 
-    private UsuarioService service;
-    private LoginService loginService;
+    private final UsuarioService service;
+    private final LoginService loginService;
 
     @GetMapping("/all")
     public List<UsuarioMostrarDTO> obtenerTodosUsuarios(){
@@ -33,8 +33,70 @@ public class UsuarioController {
     }
 
     @PostMapping("/create")
-    public void createUsuarios(@RequestBody UsuarioCreateDTO dto) {
-        service.createUsuario(dto);
+    public ResponseEntity<?> createUsuarios(@RequestBody UsuarioCreateDTO dto) {
+        try {
+            service.createUsuario(dto);
+            return ResponseEntity.ok(Map.of(
+                "message", "Usuario registrado exitosamente. Revisa tu correo para verificar tu cuenta."
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400)
+                .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyAccount(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String code = request.get("code");
+            service.verifyAccount(email, code);
+            return ResponseEntity.ok(Map.of(
+                "message", "Cuenta verificada exitosamente. Ya puedes iniciar sesión."
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400)
+                .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            service.resendVerificationCode(email);
+            return ResponseEntity.ok(Map.of(
+                "message", "Código de verificación reenviado. Revisa tu correo."
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400)
+                .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/request-recovery")
+    public ResponseEntity<?> requestRecovery(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        service.sendRecoveryCode(email);
+        return ResponseEntity.ok(Map.of(
+            "message", "Si el email existe, recibirás un código de recuperación."
+        ));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String code = request.get("code");
+            String newPassword = request.get("newPassword");
+            service.resetPassword(email, code, newPassword);
+            return ResponseEntity.ok(Map.of(
+                "message", "Contraseña restablecida exitosamente."
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400)
+                .body(Map.of("message", e.getMessage()));
+        }
     }
 
     @PutMapping("/update/{id}")
@@ -53,11 +115,9 @@ public class UsuarioController {
             Map<String, Object> respuesta = loginService.loguearUsuario(dto);
             return ResponseEntity.ok(respuesta);
         } catch (RuntimeException e) {
-            // Manejar errores de autenticación
             return ResponseEntity.status(401)
                     .body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            // Manejar otros errores
             return ResponseEntity.status(500)
                     .body(Map.of("message", "Error interno del servidor"));
         }

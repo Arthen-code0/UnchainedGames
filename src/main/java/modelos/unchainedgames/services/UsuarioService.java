@@ -1,6 +1,7 @@
 package modelos.unchainedgames.services;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import modelos.unchainedgames.dto.LoginCreateDTO;
 import modelos.unchainedgames.dto.UsuarioCreateDTO;
 import modelos.unchainedgames.dto.UsuarioMostrarDTO;
 import modelos.unchainedgames.models.Usuario;
@@ -11,14 +12,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-
 public class UsuarioService implements UserDetailsService {
 
     @Autowired
@@ -27,246 +28,184 @@ public class UsuarioService implements UserDetailsService {
     @Autowired
     private MecanismoSeguridad seguridad;
 
-    public List<UsuarioMostrarDTO> obtenerTodosUsuarios(){
-        List<Usuario> usuarios = repository.findAll();
-        List<UsuarioMostrarDTO> dtos = new ArrayList<>();
+    @Autowired
+    private EmailService emailService;
 
-        for(Usuario usuario : usuarios){
-            UsuarioMostrarDTO dto = new UsuarioMostrarDTO();
-            dto.setId(usuario.getId());
-            dto.setRol(usuario.getRol());
-            dto.setEmail(usuario.getEmail());
-            dto.setName(usuario.getName());
-            dto.setSurnames(usuario.getSurnames());
-            dto.setPhoneNumber(usuario.getPhoneNumber());
-            dto.setEnabled(usuario.getEnabled());
+    // --- CRUD ---
+    public List<UsuarioMostrarDTO> obtenerTodosUsuarios() {
+    return repository.findAll().stream()
+            .map(UsuarioMostrarDTO::new)
+            .collect(Collectors.toList());
+}
 
+
+    public Usuario obtenerUsuariosPorId(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    public void createUsuario(UsuarioCreateDTO dto) {
+        // Verificar si el email ya existe
+        if (repository.findTopByEmailEquals(dto.getEmail()) != null) {
+            throw new RuntimeException("El email ya está registrado");
         }
 
-        return dtos;
-    }
-
-    public Usuario obtenerUsuariosPorId(@PathVariable Integer id){
-
-        Usuario usuarios = repository.findById(id).orElse(null);
-
-        return usuarios;
-    }
-
-    public void createUsuario(UsuarioCreateDTO dto){
-
         Usuario newUsuario = new Usuario();
-
         newUsuario.setName(dto.getName());
         newUsuario.setSurnames(dto.getSurnames());
         newUsuario.setPhoneNumber(dto.getPhoneNumber());
         newUsuario.setEmail(dto.getEmail());
+        newUsuario.setUsername(dto.getEmail());  // ← AÑADE esta línea
         newUsuario.setPassword(seguridad.GetPasswordEncoder().encode(dto.getPassword()));
-        newUsuario.setAddresses(dto.getAddresses());
-        newUsuario.setEnabled(true);
-
-        repository.save(newUsuario);
-    }
-
-    public void updateUsuario(Integer id, UsuarioCreateDTO dto){
-
-        Usuario updateUsuario = repository.findById(id).orElse(null);
-
-        if (updateUsuario != null){
-            updateUsuario.setName(dto.getName());
-            updateUsuario.setSurnames(dto.getSurnames());
-            updateUsuario.setPhoneNumber(dto.getPhoneNumber());
-            updateUsuario.setEmail(dto.getEmail());
-            updateUsuario.setPassword(dto.getPassword());
-            updateUsuario.setAddresses(dto.getAddresses());
-            updateUsuario.setEnabled(true);
+        if (dto.getAddresses() != null) {
+            newUsuario.setAddresses(dto.getAddresses());
         }
 
-        repository.save(updateUsuario);
+        // Usuario no habilitado hasta verificar
+        newUsuario.setEnabled(false);
+
+        // Generar código de verificación
+        String verificationCode = generateVerificationCode();
+        newUsuario.setVerificationCode(verificationCode);
+        newUsuario.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(24));
+
+        repository.save(newUsuario);
+
+        // Enviar email de verificación
+        try {
+            emailService.sendVerificationEmail(newUsuario.getEmail(), verificationCode);
+        } catch (Exception e) {
+            // Log del error pero no fallar el registro
+            System.err.println("Error enviando email: " + e.getMessage());
+        }
     }
 
-    public void deleteUsuario(Integer id){
+    public void updateUsuario(Integer id, UsuarioCreateDTO dto) {
+        Usuario usuario = obtenerUsuariosPorId(id);
+
+        usuario.setName(dto.getName());
+        usuario.setSurnames(dto.getSurnames());
+        usuario.setPhoneNumber(dto.getPhoneNumber());
+        usuario.setAddresses(dto.getAddresses());
+
+        repository.save(usuario);
+    }
+
+    public void deleteUsuario(Integer id) {
         repository.deleteById(id);
+    }
+
+    // --- AUTH + SEGURIDAD ---
+
+   public boolean verifyAccount(String email, String code) {
+        Usuario usuario = repository.findTopByEmailEquals(email);
+
+        if (usuario == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        if (usuario.getEnabled()) {
+            throw new RuntimeException("La cuenta ya está verificada");
+        }
+
+        if (usuario.getVerificationCode() == null ||
+            !usuario.getVerificationCode().equals(code)) {
+            throw new RuntimeException("Código de verificación inválido");
+        }
+
+        if (usuario.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("El código de verificación ha expirado");
+        }
+
+        // Verificar cuenta
+        usuario.setEnabled(true);
+        usuario.setVerificationCode(null);
+        usuario.setVerificationCodeExpiresAt(null);
+        repository.save(usuario);
+
+        return true;
+    }
+
+    public void sendRecoveryCode(String email) {
+        Usuario usuario = repository.findTopByEmailEquals(email);
+
+        if (usuario == null) {
+            // Por seguridad, no revelar que el usuario no existe
+            return;
+        }
+
+        // Generar código de recuperación
+        String recoveryCode = generateRecoveryCode();
+        usuario.setRecoveryCode(recoveryCode);
+        usuario.setRecoveryCodeExpiresAt(LocalDateTime.now().plusHours(1));
+        repository.save(usuario);
+
+        // Enviar email
+        try {
+            emailService.sendRecoveryEmail(usuario.getEmail(), recoveryCode);
+        } catch (Exception e) {
+            System.err.println("Error enviando email de recuperación: " + e.getMessage());
+        }
+    }
+
+    public void resetPassword(String email, String code, String newPassword) {
+        Usuario usuario = repository.findTopByEmailEquals(email);
+
+        if (usuario == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        if (usuario.getRecoveryCode() == null ||
+            !usuario.getRecoveryCode().equals(code)) {
+            throw new RuntimeException("Código de recuperación inválido");
+        }
+
+        if (usuario.getRecoveryCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("El código de recuperación ha expirado");
+        }
+
+        // Cambiar contraseña
+        usuario.setPassword(seguridad.GetPasswordEncoder().encode(newPassword));
+        usuario.setRecoveryCode(null);
+        usuario.setRecoveryCodeExpiresAt(null);
+        repository.save(usuario);
+    }
+
+    public void resendVerificationCode(String email) {
+        Usuario usuario = repository.findTopByEmailEquals(email);
+
+        if (usuario == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        if (usuario.getEnabled()) {
+            throw new RuntimeException("La cuenta ya está verificada");
+        }
+
+        // Generar nuevo código
+        String verificationCode = generateVerificationCode();
+        usuario.setVerificationCode(verificationCode);
+        usuario.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(24));
+        repository.save(usuario);
+
+        // Reenviar email
+        try {
+            emailService.sendVerificationEmail(usuario.getEmail(), verificationCode);
+        } catch (Exception e) {
+            System.err.println("Error reenviando email: " + e.getMessage());
+        }
+    }
+
+    private String generateVerificationCode() {
+        return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+    }
+
+    private String generateRecoveryCode() {
+        return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findTopByEmailEquals(username);
     }
-
-
-
-//    private AuthenticationManager authenticationManager;
-//    private PasswordEncoder passwordEncoder;
-//    private EmailService emailService;
-//    @Override
-//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        return repository.findTopByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
-//    }
-//
-//    @Override
-//    public List<Usuario> obtenerTodosUsuarios() {
-//        return repository.findAll();
-//    }
-//
-//    @Override
-//    public Optional<Usuario> obtenerUsuarioPorId(Integer id) {
-//        return repository.findById(id);
-//    }
-//
-//    @Override
-//    public void createUsuario(UsuarioCreateDTO dto) {
-//        // Verificar si el usuario ya existe
-//        if (repository.findTopByUsername(dto.getEmail()).isPresent()) {
-//            throw new RuntimeException("El usuario ya existe");
-//        }
-//
-//        Usuario newUsuario = new Usuario();
-//        newUsuario.setName(dto.getName());
-//        newUsuario.setSurnames(dto.getSurnames());
-//        newUsuario.setPhoneNumber(dto.getPhoneNumber());
-//        newUsuario.setEmail(dto.getEmail());
-//        newUsuario.setUsername(dto.getEmail()); // Asumiendo que el username es el email
-//        newUsuario.setPassword(passwordEncoder.encode(dto.getPassword())); // Encriptar contraseña
-//        newUsuario.setAddresses(dto.getAddresses());
-//        newUsuario.setEnabled(true); // Usuario habilitado por defecto
-//        newUsuario.setVerificationCode(//generateVerificationCode()); // Código de verificación
-//
-//        repository.save(newUsuario);
-//
-//        // Enviar código de verificación por email
-//        emailService.sendVerificationEmail(newUsuario.getEmail(), newUsuario.getVerificationCode());
-//    }
-//
-//    @Override
-//    public void updateUsuario(Integer id, UsuarioCreateDTO dto) {
-//        repository.findById(id).ifPresent(usuario -> {
-//            usuario.setName(dto.getName());
-//            usuario.setSurnames(dto.getSurnames());
-//            usuario.setPhoneNumber(dto.getPhoneNumber());
-//            usuario.setEmail(dto.getEmail());
-//            // No actualizar la contraseña aquí, usar método específico
-//            usuario.setAddresses(dto.getAddresses());
-//            repository.save(usuario);
-//        });
-//    }
-//
-//    @Override
-//    public void deleteUsuario(Integer id) {
-//        repository.deleteById(id);
-//    }
-
-//    public Usuario loginUsuario(String username, String password) {
-//        try {
-//            Authentication authentication = authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(username, password)
-//            );
-//
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-//
-//            return repository.findTopByUsername(username)
-//                    .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException("Credenciales inválidas", e);
-//        }
-//    }
-//
-//    public Usuario registroUsuario(UsuarioCreateDTO dto) {
-//        // Verificar si el usuario ya existe
-//        if (repository.findTopByUsername(dto.getEmail()).isPresent()) {
-//            throw new RuntimeException("El usuario ya está registrado");
-//        }
-//
-//        Usuario newUsuario = new Usuario();
-//        newUsuario.setName(dto.getName());
-//        newUsuario.setSurnames(dto.getSurnames());
-//        newUsuario.setPhoneNumber(dto.getPhoneNumber());
-//        newUsuario.setEmail(dto.getEmail());
-//        newUsuario.setUsername(dto.getEmail());
-//        newUsuario.setPassword(passwordEncoder.encode(dto.getPassword()));
-//        newUsuario.setAddresses(dto.getAddresses());
-//        newUsuario.setEnabled(false); // No habilitado hasta verificación
-//        newUsuario.setVerificationCode(generateVerificationCode());
-//
-//        Usuario usuarioGuardado = repository.save(newUsuario);
-//
-//        // Enviar código de verificación
-//        emailService.sendVerificationEmail(usuarioGuardado.getEmail(), usuarioGuardado.getVerificationCode());
-//
-//        return usuarioGuardado;
-//    }
-
-    // Cambiar contraseña
-//    public void cambiarContrasena(String username, String currentPassword, String newPassword) {
-//        Usuario usuario = repository.findTopByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-//
-//        // Verificar contraseña actual
-//        if (!passwordEncoder.matches(currentPassword, usuario.getPassword())) {
-//            throw new RuntimeException("La contraseña actual es incorrecta");
-//        }
-//
-//        // Actualizar contraseña
-//        usuario.setPassword(passwordEncoder.encode(newPassword));
-//        repository.save(usuario);
-//    }
-//
-//    // Cambiar contraseña con código de recuperación
-//    public void cambiarContrasenaConCodigo(String email, String codigoRecuperacion, String newPassword) {
-//        Usuario usuario = repository.findByEmailAndRecoveryCode(email, codigoRecuperacion)
-//                .orElseThrow(() -> new RuntimeException("Código de recuperación inválido o expirado"));
-//
-//        usuario.setPassword(passwordEncoder.encode(newPassword));
-//        usuario.setRecoveryCode(null); // Limpiar código de recuperación
-//        repository.save(usuario);
-//    }
-//
-//    // Enviar código de recuperación
-//    public void enviarCodigoRecuperacion(String email) {
-//        Usuario usuario = repository.findTopByUsername(email)
-//                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-//
-//        String recoveryCode = generateRecoveryCode();
-//        usuario.setRecoveryCode(recoveryCode);
-//        repository.save(usuario);
-//
-//        // Enviar código por email
-//        emailService.sendRecoveryCodeEmail(email, recoveryCode);
-//    }
-//
-//    // Verificación de cuenta
-//    public boolean verificarCuenta(String email, String codigoVerificacion) {
-//        Optional<Usuario> usuarioOpt = repository.findByEmailAndVerificationCode(email, codigoVerificacion);
-//
-//        if (usuarioOpt.isPresent()) {
-//            Usuario usuario = usuarioOpt.get();
-//            usuario.setEnabled(true);
-//            usuario.setVerificationCode(null);
-//            repository.save(usuario);
-//            return true;
-//        }
-//
-//        return false;
-//    }
-//
-//    // Métodos auxiliares
-//    private String generateVerificationCode() {
-//        return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-//    }
-//
-//    private String generateRecoveryCode() {
-//        return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-//    }
-//
-//    // Obtener usuario actualmente autenticado
-//    public Optional<Usuario> getCurrentUser() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication != null && authentication.isAuthenticated()) {
-//            String username = authentication.getName();
-//            return repository.findTopByUsername(username);
-//        }
-//        return Optional.empty();
-//    }
 }

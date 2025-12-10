@@ -33,6 +33,11 @@ public class SecurityConfig {
                         // ⬇️ OPCIONAL: abrir también usuario create / login
                         .requestMatchers(HttpMethod.POST, "/usuario/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/create").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/verify").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/resend-verification").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/request-recovery").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/reset-password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/").permitAll()
 
                         // el resto, de momento, también abiertos
                         .anyRequest().permitAll()
