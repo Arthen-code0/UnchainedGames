@@ -1,16 +1,13 @@
 package modelos.unchainedgames.models;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.math.BigDecimal;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = {"pedido", "product"})
 @EqualsAndHashCode
 @Entity
 @Table(name = "pedidoline", schema = "unchainedgames", catalog = "postgres")
@@ -23,8 +20,12 @@ public class PedidoLine {
     @Column(name = "amount")
     private Integer amount;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
+    // 👇 NUEVO: esta línea pertenece a un pedido
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pedido_id")
+    private Pedido pedido;
 }

@@ -1,19 +1,14 @@
 package modelos.unchainedgames.dto;
 
-import lombok.*;
-import modelos.unchainedgames.models.PedidoLine;
-import modelos.unchainedgames.models.Product;
-
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class PedidoLineCreateDTO {
-    private Integer id;
+
     private Integer amount;
-    private Product product;
-    private PedidoLine pedidoLine;
+    private Integer productId;
 }

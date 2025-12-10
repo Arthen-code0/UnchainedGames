@@ -33,32 +33,55 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(auth -> auth
-                        // -------- RUTAS PÚBLICAS --------
+                        // ---------- RUTAS PÚBLICAS ----------
                         .requestMatchers(HttpMethod.POST, "/usuario/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/create").anonymous()
 
                         .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
 
-                        // 👉 TODAS las rutas de solicitudes de empleo son públicas
                         .requestMatchers("/solicitudes-empleo/**").permitAll()
 
-                        // -------- RUTAS RESTRINGIDAS --------
+                        // ---------- PRODUCTOS (solo admin puede CREAR/EDITAR/BORRAR) ----------
                         .requestMatchers(HttpMethod.POST, "/product/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/product/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/product/**").hasAuthority("ADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/review/me").authenticated()
+                        // ---------- REVIEWS ----------
+                        // Ver reviews de cualquier producto
                         .requestMatchers(HttpMethod.GET, "/review/**").permitAll()
+                        // Ver mis reviews
+                        .requestMatchers(HttpMethod.GET, "/review/me").authenticated()
+                        // Crear / editar / borrar -> usuario logueado
                         .requestMatchers(HttpMethod.POST, "/review/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/review/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/review/**").authenticated()
 
+                        // ---------- PEDIDOS ----------
+                        // Crear pedido (desde carrito): usuario logueado (USUARIO o ADMIN)
+                        .requestMatchers(HttpMethod.POST, "/pedido/create")
+                        .hasAnyAuthority("USUARIO", "ADMIN")
+
+                        // Ver mis pedidos
+                        .requestMatchers(HttpMethod.GET, "/pedido/me")
+                        .hasAnyAuthority("USUARIO", "ADMIN")
+
+                        // Ver detalle / listado general de pedidos:
+                        // solo ADMIN (el método de servicio además revisará que
+                        // si no eres admin, el pedido sea tuyo)
+                        .requestMatchers(HttpMethod.GET, "/pedido/**")
+                        .hasAuthority("ADMIN")
+
+                        // No exponemos DELETE de pedidos: nadie borra
+                        // (si algún día añades endpoint DELETE /pedido/**, protégelo con ADMIN)
+
+                        // Preflight CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // CUALQUIER OTRA RUTA: autenticación obligatoria
+                        // ---------- CUALQUIER OTRA COSA: autenticar ----------
                         .anyRequest().authenticated()
                 );
 
+        // Meter el filtro JWT antes del de username/password
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

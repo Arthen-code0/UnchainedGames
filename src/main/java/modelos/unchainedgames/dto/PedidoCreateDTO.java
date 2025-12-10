@@ -1,18 +1,15 @@
 package modelos.unchainedgames.dto;
 
-import lombok.*;
-import modelos.unchainedgames.models.Usuario;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.util.List;
 
 @Data
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class PedidoCreateDTO {
-    private Integer id;
-    private Timestamp datetime;
-    private Integer status;
-    private Usuario usuario;
+
+    private List<PedidoLineCreateDTO> lineas;
 }
